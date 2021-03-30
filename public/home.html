@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>API for Multiplier</title>
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script src="https://code.jquery.com/jquery.js"></script>
+
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="jumbotron">
+      <h1 class="text-center"><span class="fa fa-fire"></span>API for Multiplier</h1>
+      <hr>
+      <h2 class="text-center">Takes 2 numbers and returns the product</h2>
+      <br>
+
+      <!-- <div class="text-center">
+        <a href="/grid"><button class="btn btn-lg btn-primary"><span class="fa fa-list-alt"></span> View Numbers</button></a>
+        <a href="/newpair"><button class="btn btn-lg btn-danger"><span class="fa fa-credit-card"></span> Include New Number Pairs</button></a>
+      </div> -->
+
+      <div class="container">
+        <div class="row">
+          <div class="col-6">
+
+            <div class="card">
+              <div class="card-header">
+                <h4>Current Number Pairs</h4>
+              </div>
+              <div class="card-body">
+                <ul id="tableList" class="list-group"></ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+
+
+            <div class="card">
+              <div class="card-header">
+                Include New Number Pairs
+              </div>
+              <div class="card-body">
+                <form role="form">
+                  <div class="form-group">
+                    <label for="number-one">Number One</label>
+                    <input type="text" class="form-control" id="number-one">
+                  </div>
+                  <div class="form-group">
+                    <label for="number-two">Number Two</label>
+                    <input type="text" class="form-control" id="number-two">
+                  </div>
+                  <button type="submit" class="btn btn-primary submit">Submit</button>
+                </form>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+
+
+      </div>
+
+      <footer class="footer">
+        <div class="container">
+          <p><a href="/api/numbers">API Link</a></p>
+        </div>
+      </footer>
+
+    </div>
+
+
+</body>
+
+<!-- BELOW CODE IS CRITICAL. IT HANDLES HOW FORM DATA IS LOADED FROM OUR SERVER -->
+<script type="text/javascript">
+
+  // In this code, jQuery is used to "download" the data from our server
+  // We then dynamically display this content in our table. This is very similar to the group projects you just completed.
+  // It's also very similar to the NYT search application. In fact, I copied a ton of code from there.
+
+  function runTableQuery() {
+    // The AJAX function uses the URL of our API to GET the data associated with it (initially set to localhost)
+    $.ajax({ url: "/api/numbers", method: "GET" })
+      .then(function (numberData) {
+
+        // Here we then log the tableData to console, where it will show up as an object.
+        console.log(numberData);
+        console.log("------------------------------------");
+
+        // Loop through and display each of the customers
+        for (var i = 0; i < numberData.length; i++) {
+
+          // Get a reference to the tableList element and populate it with tables
+          var tableList = $("#tableList");
+
+          // Then display the fields in the HTML
+          var listItem = $("<li class='list-group-item mt-4'>");
+
+          listItem.append(
+            $("<h2>").text("Number Pair #" + (i + 1)),
+            $("<hr>"),
+            $("<h2>").text("Number One: " + numberData[i].numberOne),
+            $("<h2>").text("Number Two: " + numberData[i].numberTwo),
+          );
+
+          tableList.append(listItem);
+        }
+      });
+  }
+
+  runTableQuery();
+
+  $(".submit").on("click", function (event) {
+    event.preventDefault();
+
+    // Here we grab the form elements
+    var newNumbers = {
+      numberOne: $("#number-one").val().trim(),
+      numberTwo: $("#number-two").val().trim(),
+    };
+
+    console.log(newNumbers);
+
+    // This line is the magic. It"s very similar to the standard ajax function we used.
+    // Essentially we give it a URL, we give it the object we want to send, then we have a "callback".
+    // The callback is the response of the server. In our case, we set up code in api-routes that "returns" true or false
+    // depending on if a tables is available or not.
+
+    $.post("/api/numbers", newNumbers,
+      function (data) {
+
+        // If a table is available... tell user they are booked.
+        if (data) {
+          alert("Yay! You put 2 numbers in the grid!");
+        }
+
+        // If a table is available... tell user they on the waiting list.
+        else {
+          alert("Sorry you did not increase the grid");
+        }
+
+        // Clear the form when submitting
+        $("#number-one").val("");
+        $("#number-two").val("");
+
+      });
+  });
+
+</script>
+
+
+</html>
